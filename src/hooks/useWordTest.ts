@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, type SetStateAction } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { WORDS } from "../utils/wordBank";
+import { useScores } from "./useScores";
 
 type GameState = "ready" | "memorize" | "recall" | "complete";
 
@@ -12,16 +13,37 @@ export function useWordMemory() {
   const [correctAnswers, setCorrectAnswers] = useState<number>(0);
   const [totalAnswered, setTotalAnswered] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [health, setHealth] = useState<number>(3); // Start with 3 health points
+  const { addScore } = useScores();
 
   // Get a random word that hasn't been used yet
   const getRandomWord = useCallback(() => {
-    const unusedWords = WORDS.filter(
-      (word) => !wordsList.includes(word) && !seenWords.includes(word)
-    );
+    const unusedWords = WORDS.filter((word) => !seenWords.includes(word));
     if (unusedWords.length === 0)
       return WORDS[Math.floor(Math.random() * WORDS.length)];
     return unusedWords[Math.floor(Math.random() * unusedWords.length)];
-  }, [wordsList, seenWords]);
+  }, [seenWords]);
+
+  // Get a random word for the recall phase
+  const getRecallWord = useCallback(() => {
+    // Decide whether to show a seen word or a new word
+    // Higher chance of seen words at the beginning when the seenWords list is short
+    const seenWordsWeighting = Math.min(0.7, 0.4 + (1 / seenWords.length) * 3);
+    const showSeenWord =
+      Math.random() < seenWordsWeighting || totalAnswered === 0;
+
+    if (showSeenWord && seenWords.length > 0) {
+      // Show a word from the seen words list
+      return seenWords[Math.floor(Math.random() * seenWords.length)];
+    } else {
+      // Show a word that hasn't been seen yet
+      const unusedWords = WORDS.filter((word) => !seenWords.includes(word));
+      if (unusedWords.length === 0) {
+        return WORDS[Math.floor(Math.random() * WORDS.length)];
+      }
+      return unusedWords[Math.floor(Math.random() * unusedWords.length)];
+    }
+  }, [seenWords, totalAnswered]);
 
   // Reset the game
   const resetGame = useCallback(() => {
@@ -33,12 +55,13 @@ export function useWordMemory() {
     setCorrectAnswers(0);
     setTotalAnswered(0);
     setTimeLeft(0);
+    setHealth(3);
   }, []);
 
   // Start a new level
   const startLevel = useCallback(() => {
     // Generate words to memorize based on the current level
-    const wordsToMemorize: SetStateAction<string[]> = [];
+    const wordsToMemorize: string[] = [];
     const numWords = Math.min(currentLevel + 2, 15); // Cap at 15 words max
 
     for (let i = 0; i < numWords; i++) {
@@ -54,37 +77,52 @@ export function useWordMemory() {
   // Start the recall phase
   const startRecall = useCallback(() => {
     setGameState("recall");
-    setCurrentWord(getRandomWord());
+    setCurrentWord(getRecallWord());
     setTotalAnswered(0);
-  }, [getRandomWord]);
+    setCorrectAnswers(0);
+  }, [getRecallWord]);
 
   // Answer whether the current word was in the list
   const answerWord = useCallback(
     (wasInList: boolean) => {
-      const correct = wordsList.includes(currentWord) === wasInList;
+      const isWordInList = seenWords.includes(currentWord);
+      const correct = isWordInList === wasInList;
 
       if (correct) {
         setCorrectAnswers((prev) => prev + 1);
+      } else {
+        // Reduce health on incorrect answer
+        setHealth((prev) => prev - 1);
+
+        // Game over if health reaches 0
+        if (health <= 1) {
+          addScore("word-memory", currentLevel);
+          setGameState("complete");
+          return;
+        }
       }
 
       setTotalAnswered((prev) => prev + 1);
 
       // Show 10 words per round for recall
       if (totalAnswered < 9) {
-        setCurrentWord(getRandomWord());
+        setCurrentWord(getRecallWord());
       } else {
         // End of level
-        const accuracy = correctAnswers / 10;
-
-        if (accuracy >= 0.7) {
-          // 70% accuracy required to advance
-          setCurrentLevel((prev) => prev + 1);
-        }
-
+        setCurrentLevel((prev) => prev + 1);
         setGameState("complete");
+        addScore("word-memory", currentLevel);
       }
     },
-    [currentWord, wordsList, totalAnswered, correctAnswers, getRandomWord]
+    [
+      currentWord,
+      seenWords,
+      totalAnswered,
+      health,
+      currentLevel,
+      getRecallWord,
+      addScore,
+    ]
   );
 
   // Timer for memorization phase
@@ -123,6 +161,7 @@ export function useWordMemory() {
     correctAnswers,
     totalAnswered,
     timeLeft,
+    health,
     startGame,
     answerWord,
     nextLevel,

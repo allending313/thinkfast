@@ -14,21 +14,15 @@ const WordMemoryPage: React.FC = () => {
     correctAnswers,
     totalAnswered,
     timeLeft,
+    health,
     startGame,
     answerWord,
     nextLevel,
     resetGame,
   } = useWordMemory();
 
-  const { addScore, getBestScore } = useScores();
+  const { getBestScore } = useScores();
   const bestScore = getBestScore("word-memory")?.score || 0;
-
-  // Save score when game completes
-  React.useEffect(() => {
-    if (gameState === "complete") {
-      addScore("word-memory", currentLevel);
-    }
-  }, [gameState, currentLevel, addScore]);
 
   // Game state components
   const renderReadyState = () => (
@@ -40,7 +34,7 @@ const WordMemoryPage: React.FC = () => {
       <h2 className="text-xl font-bold mb-4">Word Memory Test</h2>
       <p className="mb-6">
         Memorize the words shown on screen. Then identify which words you've
-        seen before.
+        seen before. You have 3 lives - be careful!
       </p>
       <button onClick={startGame} className="btn btn-primary px-8 py-3 text-lg">
         Start Game
@@ -92,6 +86,18 @@ const WordMemoryPage: React.FC = () => {
     <div className="text-center">
       <div className="mb-8">
         <p className="text-lg font-medium">Level {currentLevel}</p>
+        <div className="flex justify-center mb-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <span
+              key={i}
+              className={`mx-1 text-xl ${
+                i < health ? "text-red-500" : "text-gray-300"
+              }`}
+            >
+              ❤️
+            </span>
+          ))}
+        </div>
         <p className="text-gray-600 mb-2">Did you see this word before?</p>
         <p className="text-3xl font-bold mb-4">{currentWord}</p>
         <div className="flex justify-center space-x-4">
@@ -119,7 +125,7 @@ const WordMemoryPage: React.FC = () => {
   );
 
   const renderCompleteState = () => {
-    const passedLevel = correctAnswers >= 7; // 70% correct to pass
+    const gameOver = health === 0;
     return (
       <motion.div
         className="text-center"
@@ -127,10 +133,12 @@ const WordMemoryPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <h2 className="text-2xl font-bold mb-2">
-          {passedLevel ? "Level Complete!" : "Game Over!"}
+          {gameOver ? "Game Over!" : "Level Complete!"}
         </h2>
         <p className="text-xl mb-6">
-          You got {correctAnswers} out of 10 correct
+          {gameOver
+            ? "You ran out of lives!"
+            : `You got ${correctAnswers} out of ${totalAnswered} correct`}
         </p>
 
         <div className="mb-8">
@@ -143,7 +151,7 @@ const WordMemoryPage: React.FC = () => {
         </div>
 
         <div className="space-x-4">
-          {passedLevel && (
+          {!gameOver && (
             <button onClick={nextLevel} className="btn btn-primary px-6 py-2">
               Next Level
             </button>
