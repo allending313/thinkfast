@@ -7,8 +7,18 @@ export function useReactionTest() {
   const [gameState, setGameState] = useState<GameState>("ready");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [showKeyboardHint, setShowKeyboardHint] = useState<boolean>(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { addScore } = useScores()
+  const { addScore } = useScores();
+
+  // Check if device is mobile
+  useEffect(() => {
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    setShowKeyboardHint(!isMobile);
+  }, []);
 
   // Clean up any timeouts when component unmounts
   useEffect(() => {
@@ -19,6 +29,21 @@ export function useReactionTest() {
     };
   }, []);
 
+  // Handle keyboard events for spacebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault(); // Prevent page scrolling
+        handleGameClick();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [gameState]); // Re-add listener when gameState changes
+
   // Start the game
   const startGame = useCallback(() => {
     setGameState("waiting");
@@ -28,7 +53,8 @@ export function useReactionTest() {
     const delay = Math.floor(Math.random() * 4000) + 750;
 
     timeoutRef.current = setTimeout(() => {
-      setStartTime(Date.now());
+      // Use performance.now() for more accurate timing
+      setStartTime(performance.now());
       setGameState("clickNow");
     }, delay);
   }, []);
@@ -45,13 +71,14 @@ export function useReactionTest() {
   // Handle click during the "clickNow" state (measure reaction time)
   const handleClick = useCallback(() => {
     if (gameState === "clickNow" && startTime) {
-      const endTime = Date.now();
-      const reaction = endTime - startTime;
+      // Use performance.now() for more accurate timing
+      const endTime = performance.now();
+      const reaction = Math.round(endTime - startTime);
       setReactionTime(reaction);
       setGameState("complete");
-      addScore("reaction-test", reaction)
+      addScore("reaction-test", reaction);
     }
-  }, [gameState, startTime]);
+  }, [gameState, startTime, addScore]);
 
   // Handle click based on current game state
   const handleGameClick = useCallback(() => {
@@ -90,5 +117,6 @@ export function useReactionTest() {
     reactionTime,
     handleGameClick,
     resetGame,
+    showKeyboardHint,
   };
 }

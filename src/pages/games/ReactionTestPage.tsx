@@ -6,7 +6,7 @@ import { useScores } from "../../hooks/useScores";
 
 const ReactionTestPage: React.FC = () => {
   const navigate = useNavigate();
-  const { gameState, reactionTime, handleGameClick } =
+  const { gameState, reactionTime, handleGameClick, showKeyboardHint } =
     useReactionTest();
   const { getBestScore } = useScores();
 
@@ -63,18 +63,22 @@ const ReactionTestPage: React.FC = () => {
       <p className="text-gray-600 mb-6">
         Test your reaction time. Wait for the box to turn green, then click as
         quickly as you can!
+        {showKeyboardHint && (
+          <span className="block mt-1 text-sm italic">
+            Tip: You can also press the spacebar instead of clicking
+          </span>
+        )}
       </p>
 
       <motion.div
         className={`flex-grow flex flex-col items-center justify-center rounded-lg ${getBackgroundColor()} cursor-pointer transition-colors`}
         onClick={handleGameClick}
-        onKeyDown={() => {
-          console.info("key pressed")
-          handleGameClick
-        }}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
+        tabIndex={0}
+        role="button"
+        aria-label="Game interaction area"
       >
         <p className="text-white text-2xl font-medium mb-4">
           {getInstructions()}
