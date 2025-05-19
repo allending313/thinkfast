@@ -1,59 +1,64 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { WORDS } from "../utils/wordBank";
 import { useScores } from "./useScores";
+import { RandSet } from "../utils/randSet";
 
 type GameState = "ready" | "playing" | "game-over";
 
 export function useWordMemory() {
   const [gameState, setGameState] = useState<GameState>("ready");
-  const [seenWords, setSeenWords] = useState<Set<string>>(new Set());
+  const [seenWords, setSeenWords] = useState<RandSet>(new RandSet());
   const [currentWord, setCurrentWord] = useState<string>("");
-  const [previousWord, setPreviousWord] = useState<string>("");
+  const [previousWord, setPreviousWord] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
   const [health, setHealth] = useState<number>(3);
-  const [showMistake, setShowMistake] = useState<boolean>(false);
+  const [seen, setSeen] = useState<boolean>(false);
   const { addScore } = useScores();
 
-  // Get a random word (that's not the same as the previous word)
-  const getRandomWord = useCallback(() => {
-    let newWord;
-    do {
-      newWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-    } while (newWord === previousWord);
+ const getRandomWord = useCallback((): [string, number, boolean] => {
+   const wordCount = WORDS.length;
+   let index: number;
+   let fromSeen = false;
 
-    return newWord;
-  }, [previousWord]);
+   if (Math.random() < 0.1 && seenWords.size() > 0) {
+     const seenIndex = seenWords.getRandom();
+     if (seenIndex !== undefined && seenIndex !== previousWord) {
+       return [WORDS[seenIndex], seenIndex, true];
+     }
+   }
+
+   if (wordCount <= 1) {
+     return [WORDS[0], 0, seenWords.has(0)];
+   }
+
+   do {
+     index = Math.floor(Math.random() * wordCount);
+   } while (index === previousWord);
+
+   fromSeen = seenWords.has(index);
+   if (!fromSeen) seenWords.add(index)
+   return [WORDS[index], index, fromSeen];
+ }, [previousWord, seenWords]);
 
   // Start the game
   const startGame = useCallback(() => {
     setGameState("playing");
-    setSeenWords(new Set());
+    setSeenWords(new RandSet());
     const firstWord = getRandomWord();
-    setCurrentWord(firstWord);
-    setPreviousWord(firstWord);
+    setCurrentWord(firstWord[0]);
+    setPreviousWord(0);
     setScore(0);
     setHealth(3);
-    setShowMistake(false);
+    setSeen(false);
   }, [getRandomWord]);
 
   // Answer whether the current word was seen before
   const answerWord = useCallback(
-    (wasSeen: boolean) => {
-      const isWordSeen = seenWords.has(currentWord);
-      const correct = isWordSeen === wasSeen;
-
+    (correct: boolean) => {
       if (correct) {
         // Increase score for correct answer
         setScore((prev) => prev + 1);
       } else {
-        // Show mistake animation
-        setShowMistake(true);
-
-        // Reset mistake indicator after animation time
-        setTimeout(() => {
-          setShowMistake(false);
-        }, 500);
-
         // Reduce health on incorrect answer
         setHealth((prev) => prev - 1);
 
@@ -65,15 +70,11 @@ export function useWordMemory() {
         }
       }
 
-      // Add current word to seen words
-      setSeenWords((prev) => new Set(prev).add(currentWord));
-
-      // Save current word as previous
-      setPreviousWord(currentWord);
-
       // Get next word
-      const nextWord = getRandomWord();
-      setCurrentWord(nextWord);
+      const [word, index, hasBeenSeen] = getRandomWord();
+      setPreviousWord(index);
+      setSeen(hasBeenSeen);
+      setCurrentWord(word);
     },
     [currentWord, seenWords, health, score, getRandomWord, addScore]
   );
@@ -81,12 +82,12 @@ export function useWordMemory() {
   // Reset the game
   const resetGame = useCallback(() => {
     setGameState("ready");
-    setSeenWords(new Set());
+    setSeenWords(new RandSet());
     setCurrentWord("");
-    setPreviousWord("");
+    setPreviousWord(0);
     setScore(0);
     setHealth(3);
-    setShowMistake(false);
+    setSeen(false);
   }, []);
 
   // Try again
@@ -99,7 +100,7 @@ export function useWordMemory() {
     currentWord,
     score,
     health,
-    showMistake,
+    seen,
     startGame,
     answerWord,
     resetGame,

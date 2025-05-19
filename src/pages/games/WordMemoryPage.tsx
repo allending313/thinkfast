@@ -25,7 +25,7 @@ const WordMemoryPage: React.FC = () => {
     currentWord,
     score,
     health,
-    showMistake,
+    seen,
     startGame,
     answerWord,
     resetGame,
