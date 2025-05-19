@@ -36,7 +36,7 @@ export const GAME_CONFIGS: Record<string, GameConfig> = {
   "word-memory": {
     id: "word-memory",
     name: "Word Memory",
-    scoreUnit: "words",
+    scoreUnit: "points",
     isHigherBetter: true,
   },
   "tile-memory": {
