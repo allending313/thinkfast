@@ -54,7 +54,7 @@ const ReactionTestPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-900">Reaction Test</h1>
         <button
           onClick={() => navigate("/")}
-          className="btn btn-secondary text-sm"
+          className="btn btn-secondary text-sm px-3 py-1"
         >
           Back to Games
         </button>

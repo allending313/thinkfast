@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+.btn-primary {
+  /* @apply border border-gray-300 rounded-xl px-6 py-2 [box-shadow:0px_2px_1px_#c7c7c7] active:translate-y-[2px] active:shadow-none */
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--color-gray-300) /* oklch(87.2% 0.01 258.338) = #d1d5dc */;
+  border-radius: var(--radius-xl) /* 0.75rem = 12px */;
+  padding-inline: calc(var(--spacing) * 6) /* 1.5rem = 24px */;
+  padding-block: calc(var(--spacing) * 2) /* 0.5rem = 8px */;
+  box-shadow: 0px 2px 1px #c7c7c7;
+  &:active {
+    --tw-translate-y: 2px;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+    --tw-shadow: 0 0 #0000;
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+}
+
+.btn-secondary {
+  /* @apply border border-gray-300 rounded-xl px-3 py-1 [box-shadow:0px_2px_1px_#c7c7c7] active:translate-y-[2px] active:shadow-none */
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--color-gray-300) /* oklch(87.2% 0.01 258.338) = #d1d5dc */;
+  border-radius: var(--radius-xl) /* 0.75rem = 12px */;
+  padding-inline: calc(var(--spacing) * 3) /* 1.5rem = 24px */;
+  padding-block: calc(var(--spacing) * 1) /* 0.5rem = 8px */;
+  box-shadow: 0px 2px 1px #c7c7c7;
+  &:active {
+    --tw-translate-y: 2px;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+    --tw-shadow: 0 0 #0000;
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+}
+

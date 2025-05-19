@@ -51,14 +51,14 @@ const MemoryButton: React.FC<MemoryButtonProps> = ({
   };
 
   return (
-    <motion.button
-      animate={controls}
-      whileHover={{ scale: 1.05 }}
-      onClick={handleClick}
-      className={`btn btn-primary px-6 py-2 transition-colors`}
-    >
-      {type}
-    </motion.button>
+    <motion.div animate={controls} whileHover={{ scale: 1.05 }}>
+      <button
+        onClick={handleClick}
+        className={`btn btn-primary transition-colors border border-gray-300 rounded-xl px-6 py-2 [box-shadow:0px_2px_1px_#c7c7c7] active:translate-y-[2px] active:shadow-none`}
+      >
+        {type}
+      </button>
+    </motion.div>
   );
 };
 

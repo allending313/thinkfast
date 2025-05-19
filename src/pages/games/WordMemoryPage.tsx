@@ -81,7 +81,7 @@ const WordMemoryPage: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
     >
       <h2 className="text-2xl font-bold mb-2">Game Over!</h2>
-      <HealthBar health={health} maxHealth={maxHealth}/>
+      <HealthBar health={health} maxHealth={maxHealth} />
       <p className="text-xl mb-6">You ran out of lives!</p>
 
       <div className="mb-8">
@@ -95,8 +95,11 @@ const WordMemoryPage: React.FC = () => {
         <button onClick={tryAgain} className="btn btn-primary px-6 py-2">
           Try Again
         </button>
-        <button onClick={resetGame} className="btn btn-secondary px-6 py-2">
-          Back to Start
+        <button
+          onClick={() => navigate("/")}
+          className="btn btn-primary px-6 py-2"
+        >
+          Back to Home
         </button>
       </div>
     </motion.div>
@@ -120,12 +123,6 @@ const WordMemoryPage: React.FC = () => {
     <div className="px-4 py-6 flex flex-col min-h-[70vh]">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-900">Word Memory</h1>
-        <button
-          onClick={() => navigate("/")}
-          className="btn btn-secondary text-sm"
-        >
-          Back to Games
-        </button>
       </div>
 
       <div className="flex-grow flex flex-col items-center justify-center p-4">
