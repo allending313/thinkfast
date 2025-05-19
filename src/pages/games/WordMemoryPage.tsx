@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { useWordMemory } from "../../hooks/useWordTest";
 import { useScores } from "../../hooks/useScores";
+import HealthBar from "../../components/games/HealthBar";
 
 const WordCard: React.FC<{ word: string }> = ({ word }) => (
   <motion.div
@@ -32,6 +33,7 @@ const WordMemoryPage: React.FC = () => {
 
   const { getBestScore } = useScores();
   const bestScore = getBestScore("word-memory")?.score || 0;
+  const maxHealth = 3
 
   // Game state components
   const renderReadyState = () => (
@@ -45,7 +47,7 @@ const WordMemoryPage: React.FC = () => {
         Remember which words you've seen before. For each word, choose whether
         you've seen it or if it's new. You have 3 lives - be careful!
       </p>
-      <HealthBar health={health} />
+      <HealthBar health={health} maxHealth={maxHealth} />
       <button onClick={startGame} className="btn btn-primary px-8 py-3 text-lg">
         Start Game
       </button>
@@ -56,25 +58,12 @@ const WordMemoryPage: React.FC = () => {
     <div className="text-center">
       <div className="mb-4">
         <p className="text-lg font-medium">Score: {score}</p>
-        <HealthBar health={health} />
+        <HealthBar health={health} maxHealth={maxHealth}/>
         <p className="text-gray-600 mb-2">Have you seen this word before?</p>
       </div>
 
       <AnimatePresence mode="wait">
         <WordCard key={currentWord} word={currentWord} />
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showMistake && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-red-500 font-medium mb-4"
-          >
-            Incorrect!
-          </motion.div>
-        )}
       </AnimatePresence>
 
       <div className="flex justify-center space-x-4">
@@ -113,7 +102,7 @@ const WordMemoryPage: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
     >
       <h2 className="text-2xl font-bold mb-2">Game Over!</h2>
-      <HealthBar health={health} />
+      <HealthBar health={health} maxHealth={maxHealth}/>
       <p className="text-xl mb-6">You ran out of lives!</p>
 
       <div className="mb-8">
