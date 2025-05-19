@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { useWordMemory } from "../../hooks/useWordTest";
 import { useScores } from "../../hooks/useScores";
 import HealthBar from "../../components/games/HealthBar";
+import MemoryButton from "../../components/games/MemoryButton";
 
 const WordCard: React.FC<{ word: string }> = ({ word }) => (
   <motion.div
@@ -67,30 +68,8 @@ const WordMemoryPage: React.FC = () => {
       </AnimatePresence>
 
       <div className="flex justify-center space-x-4">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={showMistake ? { x: [-5, 5, -5, 5, 0] } : {}}
-          transition={{ duration: 0.3 }}
-          onClick={() => answerWord(true)}
-          className={`btn btn-primary px-6 py-2 ${
-            showMistake ? "border-red-400" : ""
-          }`}
-        >
-          Seen
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={showMistake ? { x: [-5, 5, -5, 5, 0] } : {}}
-          transition={{ duration: 0.3 }}
-          onClick={() => answerWord(false)}
-          className={`btn btn-secondary px-6 py-2 ${
-            showMistake ? "border-red-400" : ""
-          }`}
-        >
-          New
-        </motion.button>
+        <MemoryButton type='seen' isSeen={seen} submit={answerWord}/>
+        <MemoryButton type='new' isSeen={seen} submit={answerWord}/>
       </div>
     </div>
   );
