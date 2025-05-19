@@ -1,8 +1,28 @@
 import React from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { useWordMemory } from "../../hooks/useWordTest";
 import { useScores } from "../../hooks/useScores";
+
+const HeartIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
+  <motion.span
+    key={filled ? "filled" : "empty"}
+    initial={{ scale: 1 }}
+    animate={{ scale: filled ? [1, 1.3, 1] : 1 }}
+    transition={{ duration: 0.3 }}
+    className={`mx-1 text-xl ${filled ? "text-red-500" : "text-gray-300"}`}
+  >
+    ❤️
+  </motion.span>
+);
+
+const HealthBar: React.FC<{ health: number }> = ({ health }) => (
+  <div className="flex justify-center mb-2">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <HeartIcon key={i} filled={i < health} />
+    ))}
+  </div>
+);
 
 const WordMemoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +35,7 @@ const WordMemoryPage: React.FC = () => {
     totalAnswered,
     timeLeft,
     health,
+    showMistake,
     startGame,
     answerWord,
     nextLevel,
@@ -36,6 +57,7 @@ const WordMemoryPage: React.FC = () => {
         Memorize the words shown on screen. Then identify which words you've
         seen before. You have 3 lives - be careful!
       </p>
+      <HealthBar health={health} />
       <button onClick={startGame} className="btn btn-primary px-8 py-3 text-lg">
         Start Game
       </button>
@@ -46,6 +68,7 @@ const WordMemoryPage: React.FC = () => {
     <div className="text-center">
       <div className="mb-4">
         <p className="text-lg font-medium">Level {currentLevel}</p>
+        <HealthBar health={health} />
         <p className="text-gray-600">Memorize these words:</p>
         <p className="text-gray-600 text-sm mb-2">
           Time left: {timeLeft} seconds
@@ -86,34 +109,45 @@ const WordMemoryPage: React.FC = () => {
     <div className="text-center">
       <div className="mb-8">
         <p className="text-lg font-medium">Level {currentLevel}</p>
-        <div className="flex justify-center mb-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <span
-              key={i}
-              className={`mx-1 text-xl ${
-                i < health ? "text-red-500" : "text-gray-300"
-              }`}
-            >
-              ❤️
-            </span>
-          ))}
-        </div>
+        <HealthBar health={health} />
         <p className="text-gray-600 mb-2">Did you see this word before?</p>
         <p className="text-3xl font-bold mb-4">{currentWord}</p>
+
+        <AnimatePresence>
+          {showMistake && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-red-500 font-medium mb-2"
+            >
+              Incorrect!
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex justify-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            animate={showMistake ? { x: [-5, 5, -5, 5, 0] } : {}}
+            transition={{ duration: 0.3 }}
             onClick={() => answerWord(true)}
-            className="btn btn-primary px-6 py-2"
+            className={`btn btn-primary px-6 py-2 ${
+              showMistake ? "border-red-400" : ""
+            }`}
           >
             Seen
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            animate={showMistake ? { x: [-5, 5, -5, 5, 0] } : {}}
+            transition={{ duration: 0.3 }}
             onClick={() => answerWord(false)}
-            className="btn btn-secondary px-6 py-2"
+            className={`btn btn-secondary px-6 py-2 ${
+              showMistake ? "border-red-400" : ""
+            }`}
           >
             New
           </motion.button>
@@ -135,6 +169,7 @@ const WordMemoryPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-2">
           {gameOver ? "Game Over!" : "Level Complete!"}
         </h2>
+        <HealthBar health={health} />
         <p className="text-xl mb-6">
           {gameOver
             ? "You ran out of lives!"

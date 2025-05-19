@@ -14,6 +14,7 @@ export function useWordMemory() {
   const [totalAnswered, setTotalAnswered] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [health, setHealth] = useState<number>(3); // Start with 3 health points
+  const [showMistake, setShowMistake] = useState<boolean>(false);
   const { addScore } = useScores();
 
   // Get a random word that hasn't been used yet
@@ -24,26 +25,57 @@ export function useWordMemory() {
     return unusedWords[Math.floor(Math.random() * unusedWords.length)];
   }, [seenWords]);
 
-  // Get a random word for the recall phase
-  const getRecallWord = useCallback(() => {
-    // Decide whether to show a seen word or a new word
-    // Higher chance of seen words at the beginning when the seenWords list is short
-    const seenWordsWeighting = Math.min(0.7, 0.4 + (1 / seenWords.length) * 3);
-    const showSeenWord =
-      Math.random() < seenWordsWeighting || totalAnswered === 0;
+  // Prepare words for recall phase based on the level
+  const prepareRecallWords = useCallback(() => {
+    // Calculate number of seen words to show - approximately (1 + 0.25 * level) seen words, max 7.5
+    const targetSeenWords = Math.min(1 + 0.25 * currentLevel, 7.5);
+    const numSeenWords = Math.round(targetSeenWords);
 
-    if (showSeenWord && seenWords.length > 0) {
-      // Show a word from the seen words list
-      return seenWords[Math.floor(Math.random() * seenWords.length)];
-    } else {
-      // Show a word that hasn't been seen yet
-      const unusedWords = WORDS.filter((word) => !seenWords.includes(word));
-      if (unusedWords.length === 0) {
-        return WORDS[Math.floor(Math.random() * WORDS.length)];
-      }
-      return unusedWords[Math.floor(Math.random() * unusedWords.length)];
+    // Total words to show in recall phase (10)
+    const totalRecallWords = 10;
+    const numNewWords = totalRecallWords - numSeenWords;
+
+    // Select random seen words
+    let recallSeenWords: string[] = [];
+    if (seenWords.length > 0) {
+      // Create a copy of seenWords to shuffle
+      const shuffledSeenWords = [...seenWords].sort(() => 0.5 - Math.random());
+      recallSeenWords = shuffledSeenWords.slice(0, numSeenWords);
     }
-  }, [seenWords, totalAnswered]);
+
+    // Select random new words that weren't seen
+    const unusedWords = WORDS.filter((word) => !seenWords.includes(word));
+    let recallNewWords: string[] = [];
+
+    if (unusedWords.length >= numNewWords) {
+      recallNewWords = unusedWords.slice(0, numNewWords);
+    } else {
+      // If not enough unseen words, just get what we can
+      recallNewWords = [...unusedWords];
+      // Fill remaining with random words from WORDS
+      const remainingNeeded = numNewWords - recallNewWords.length;
+      const randomWords = WORDS.sort(() => 0.5 - Math.random()).slice(
+        0,
+        remainingNeeded
+      );
+      recallNewWords = [...recallNewWords, ...randomWords];
+    }
+
+    // Combine and shuffle all recall words
+    const allRecallWords = [...recallSeenWords, ...recallNewWords].sort(
+      () => 0.5 - Math.random()
+    );
+
+    return {
+      allWords: allRecallWords,
+      seenWordsIncluded: recallSeenWords,
+    };
+  }, [currentLevel, seenWords]);
+
+  // Prepare all recall words at the beginning of recall phase
+  const [recallWords, setRecallWords] = useState<string[]>([]);
+  const [recallSeenWords, setRecallSeenWords] = useState<string[]>([]);
+  const [currentRecallIndex, setCurrentRecallIndex] = useState<number>(0);
 
   // Reset the game
   const resetGame = useCallback(() => {
@@ -56,6 +88,10 @@ export function useWordMemory() {
     setTotalAnswered(0);
     setTimeLeft(0);
     setHealth(3);
+    setShowMistake(false);
+    setRecallWords([]);
+    setRecallSeenWords([]);
+    setCurrentRecallIndex(0);
   }, []);
 
   // Start a new level
@@ -76,21 +112,33 @@ export function useWordMemory() {
 
   // Start the recall phase
   const startRecall = useCallback(() => {
+    const { allWords, seenWordsIncluded } = prepareRecallWords();
+    setRecallWords(allWords);
+    setRecallSeenWords(seenWordsIncluded);
+    setCurrentRecallIndex(0);
+    setCurrentWord(allWords[0] || "");
     setGameState("recall");
-    setCurrentWord(getRecallWord());
     setTotalAnswered(0);
     setCorrectAnswers(0);
-  }, [getRecallWord]);
+  }, [prepareRecallWords]);
 
   // Answer whether the current word was in the list
   const answerWord = useCallback(
     (wasInList: boolean) => {
-      const isWordInList = seenWords.includes(currentWord);
+      const isWordInList = recallSeenWords.includes(currentWord);
       const correct = isWordInList === wasInList;
 
       if (correct) {
         setCorrectAnswers((prev) => prev + 1);
       } else {
+        // Show mistake animation
+        setShowMistake(true);
+
+        // Reset mistake indicator after animation time
+        setTimeout(() => {
+          setShowMistake(false);
+        }, 500);
+
         // Reduce health on incorrect answer
         setHealth((prev) => prev - 1);
 
@@ -104,9 +152,13 @@ export function useWordMemory() {
 
       setTotalAnswered((prev) => prev + 1);
 
+      // Move to next word in recall phase
+      const nextIndex = currentRecallIndex + 1;
+
       // Show 10 words per round for recall
-      if (totalAnswered < 9) {
-        setCurrentWord(getRecallWord());
+      if (nextIndex < recallWords.length) {
+        setCurrentRecallIndex(nextIndex);
+        setCurrentWord(recallWords[nextIndex]);
       } else {
         // End of level
         setCurrentLevel((prev) => prev + 1);
@@ -116,11 +168,11 @@ export function useWordMemory() {
     },
     [
       currentWord,
-      seenWords,
-      totalAnswered,
+      recallSeenWords,
+      recallWords,
+      currentRecallIndex,
       health,
       currentLevel,
-      getRecallWord,
       addScore,
     ]
   );
@@ -162,6 +214,7 @@ export function useWordMemory() {
     totalAnswered,
     timeLeft,
     health,
+    showMistake,
     startGame,
     answerWord,
     nextLevel,
