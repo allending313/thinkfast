@@ -50,7 +50,7 @@ export function useReactionTest() {
     setReactionTime(null);
 
     // Random delay
-    const delay = Math.floor(Math.random() * 4000) + 750;
+    const delay = Math.floor(Math.random() * 4000) + 900;
 
     timeoutRef.current = setTimeout(() => {
       // Use performance.now() for more accurate timing

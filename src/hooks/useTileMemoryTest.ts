@@ -25,7 +25,7 @@ interface UseTileMemoryTestProps {
 export function useTileMemoryTest({
   initialSize = 3,
   initialTargetCount = 3,
-  memorizeTime = 1500,
+  memorizeTime = 2000,
   feedbackTime = 500,
 }: UseTileMemoryTestProps = {}) {
   // Game state
@@ -133,7 +133,10 @@ export function useTileMemoryTest({
           setLevel(newLevel);
 
           // Every two levels, increase grid size
-          const newSize = Math.floor(newLevel / 2) + initialSize - 1;
+          const newSize = Math.min(
+            12,
+            Math.floor((Math.sqrt(8 * newLevel + 1) - 1) / 2) + 2
+          );
           setGridSize(newSize);
 
           // Every level, increase target count by 1
