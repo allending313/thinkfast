@@ -28,7 +28,6 @@ const WordMemoryPage: React.FC = () => {
     seen,
     startGame,
     answerWord,
-    resetGame,
     tryAgain,
   } = useWordMemory();
 

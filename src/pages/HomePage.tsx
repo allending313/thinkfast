@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react"
 import { GAMES } from "../utils/gameData";
-import { GAME_CONFIGS } from "../utils/gameData";
 
 const HomePage: React.FC = () => {
   // Animation variants
@@ -40,8 +39,6 @@ const HomePage: React.FC = () => {
         animate="show"
       >
         {GAMES.map((game) => {
-          const config = GAME_CONFIGS[game.id];
-
           return (
             <motion.div
               key={game.id}
