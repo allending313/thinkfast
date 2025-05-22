@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Layout from "./components/layout/Layout";
 import HomePage from "./pages/HomePage";
@@ -9,6 +9,15 @@ import TestPage from "./pages/TestPage";
 import TileMemoryPage from "./pages/games/TileMemoryPage";
 
 const App: React.FC = () => {
+  // Add this to the beginning of your App component
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get("redirect");
+    if (redirect) {
+      window.history.replaceState({}, "", redirect);
+    }
+  }, []);
+  
   return (
     <BrowserRouter>
       <Layout>
