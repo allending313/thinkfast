@@ -9,7 +9,7 @@ import TestPage from "./pages/TestPage";
 import TileMemoryPage from "./pages/games/TileMemoryPage";
 
 const App: React.FC = () => {
-  // Add this to the beginning of your App component
+  // Handle redirect from 404.html
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get("redirect");
@@ -17,9 +17,12 @@ const App: React.FC = () => {
       window.history.replaceState({}, "", redirect);
     }
   }, []);
-  
+
+  // Get the base URL for GitHub Pages
+  const basename = import.meta.env.PROD ? "/thinkfast" : "";
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
