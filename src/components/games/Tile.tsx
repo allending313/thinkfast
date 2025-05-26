@@ -27,7 +27,7 @@ const Tile: React.FC<TileProps> = ({ state, isValid, disabled, onClick }) => {
       className={`aspect-square rounded-lg cursor-pointer shadow-md overflow-hidden ${
         disabled ? "pointer-events-none" : ""
       }`}
-      onClick={onClick}
+      onClick={!disabled ? onClick : () => {}}
       whileHover={!disabled ? { scale: 1.05 } : {}}
       whileTap={!disabled ? { scale: 0.95 } : {}}
       layout
@@ -40,6 +40,7 @@ const Tile: React.FC<TileProps> = ({ state, isValid, disabled, onClick }) => {
           stiffness: 300,
           damping: 20,
         }}
+        data-testid="innerTile"
       />
     </motion.div>
   );
