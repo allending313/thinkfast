@@ -26,7 +26,6 @@ export function useTileMemoryTest({
   initialSize = 3,
   initialTargetCount = 3,
   memorizeTime = 2000,
-  feedbackTime = 500,
 }: UseTileMemoryTestProps = {}) {
   // Game state
   const [gridSize, setGridSize] = useState<number>(initialSize);
@@ -69,18 +68,6 @@ export function useTileMemoryTest({
     }
   }, []);
 
-  // Start a new game
-  const startGame = useCallback(() => {
-    clearTimers();
-    setGridSize(initialSize);
-    setTargetCount(initialTargetCount);
-    setLevel(1);
-    setHealth(3);
-    setSelectedTiles([]);
-    setPhase("ready");
-    startLevel(initialSize, initialTargetCount);
-  }, [clearTimers, initialSize, initialTargetCount]);
-
   // Start a new level
   const startLevel = useCallback(
     (size: number, count: number) => {
@@ -96,6 +83,18 @@ export function useTileMemoryTest({
     },
     [generateTargetTiles, memorizeTime]
   );
+
+  // Start a new game
+  const startGame = useCallback(() => {
+    clearTimers();
+    setGridSize(initialSize);
+    setTargetCount(initialTargetCount);
+    setLevel(1);
+    setHealth(3);
+    setSelectedTiles([]);
+    setPhase("ready");
+    startLevel(initialSize, initialTargetCount);
+  }, [clearTimers, initialSize, initialTargetCount, startLevel]);
 
   // Handle tile click during recall phase
   const handleTileClick = useCallback(
@@ -154,10 +153,8 @@ export function useTileMemoryTest({
       health,
       level,
       targetCount,
-      feedbackTime,
       addScore,
       startLevel,
-      initialSize,
     ]
   );
 

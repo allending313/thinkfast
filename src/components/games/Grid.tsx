@@ -29,7 +29,7 @@ const Grid: React.FC<GridProps> = ({
       { x: [-5, 5, -3, 3, 0] },
       { duration: 0.4, ease: "easeInOut" }
     );
-  }, [shakeTrigger]);
+  }, [animate, scope, shakeReady, shakeTrigger]);
   // Create grid with the specified number of rows and columns
   return (
     <motion.div

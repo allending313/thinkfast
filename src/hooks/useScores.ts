@@ -20,7 +20,7 @@ export function useScores() {
   const addScore = (
     gameId: string,
     score: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, string>
   ) => {
     const newScore: GameScore = {
       gameId,

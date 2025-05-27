@@ -10,7 +10,7 @@ export interface GameScore {
   gameId: string;
   score: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string>;
 }
 
 export type ScoreUnit = "ms" | "points" | "level" | "words";

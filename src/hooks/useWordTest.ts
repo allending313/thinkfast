@@ -76,7 +76,7 @@ export function useWordMemory() {
       setSeen(hasBeenSeen);
       setCurrentWord(word);
     },
-    [currentWord, seenWords, health, score, getRandomWord, addScore]
+    [health, score, getRandomWord, addScore]
   );
 
   // Reset the game

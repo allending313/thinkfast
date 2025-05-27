@@ -29,21 +29,6 @@ export function useReactionTest() {
     };
   }, []);
 
-  // Handle keyboard events for spacebar
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" || e.key === " ") {
-        e.preventDefault(); // Prevent page scrolling
-        handleGameClick();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [gameState]); // Re-add listener when gameState changes
-
   // Start the game
   const startGame = useCallback(() => {
     setGameState("waiting");
@@ -100,6 +85,21 @@ export function useReactionTest() {
         break;
     }
   }, [gameState, startGame, handleEarlyClick, handleClick]);
+
+  // Handle keyboard events for spacebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault(); // Prevent page scrolling
+        handleGameClick();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [gameState, handleGameClick]); // Re-add listener when gameState changes
 
   // Reset the game
   const resetGame = useCallback(() => {
