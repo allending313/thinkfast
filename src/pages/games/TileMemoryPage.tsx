@@ -52,11 +52,14 @@ const TileMemoryPage: React.FC = () => {
     }
   };
 
-  const animateReady = phase === "recall" && selectedTiles.length > 0
+  const animateReady =
+    phase === "recall" &&
+    selectedTiles.length > 0 &&
+    !isTileTarget(selectedTiles.at(-1)!.row, selectedTiles.at(-1)!.col);
 
   // Render the game grid
   const renderGrid = () => (
-    <Grid rows={gridSize} cols={gridSize} className="max-w-md mx-auto" shakeReady={animateReady} shakeTrigger={health}>
+    <Grid rows={gridSize} cols={gridSize} className="max-w-md mx-auto" shakeReady={animateReady}>
       {(row, col) => {
         const tileId = `${row}-${col}`;
         const selected = isTileSelected(row, col)
