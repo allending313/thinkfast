@@ -2,14 +2,11 @@ import React from "react";
 import { motion } from "motion/react";
 import { useScores } from "../hooks/useScores.ts";
 import { GAMES, GAME_CONFIGS } from "../utils/gameData";
+import ScoreChart from "../components/ScoreChart";
 
 const StatsPage: React.FC = () => {
   const { getScoresByGame, getBestScore, getAverageScore, clearScores } =
     useScores();
-
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleDateString();
-  };
 
   // Simple animation variants
   const container = {
@@ -101,43 +98,9 @@ const StatsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <h3 className="font-medium text-gray-700 mb-2">
-                    Recent Attempts
-                  </h3>
-                  <div className="overflow-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
-                            Date
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
-                            Score
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {scores
-                          .sort((a, b) => b.timestamp - a.timestamp)
-                          .slice(0, 5)
-                          .map((score, index) => (
-                            <tr key={index}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {formatDate(score.timestamp)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {score.score} {config.scoreUnit}
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
+                  {/* Score Chart */}
+                  <div className="mb-6">
+                    <ScoreChart scores={scores} config={config} />
                   </div>
                 </>
               ) : (
